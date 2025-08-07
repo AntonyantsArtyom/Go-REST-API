@@ -13,6 +13,8 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=wallet_db
+    volumes:
+      - .:/app
 
   db:
     image: postgres:15
