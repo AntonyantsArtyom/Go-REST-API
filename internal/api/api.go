@@ -19,13 +19,10 @@ import (
 //   - GET /api/transactions — получение последних транзакций
 //   - GET /api/wallet/:address/balance — получение баланса кошелька
 func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
-	var walletRepo = repository.NewWalletRepo(db)
-	var WalletService = service.NewWalletService(*walletRepo)
-
-	var transactionRepo = repository.NewTransactionRepo(db)
-	var TransactionService = service.NewTransactionService(*transactionRepo)
-
-	handler := &Handler{WalletService, TransactionService}
+	handler := &Handler{
+		service.NewWalletService(*repository.NewWalletRepo(db)),
+		service.NewTransactionService(*repository.NewTransactionRepo(db)),
+	}
 
 	//router.POST("/api/send", handler.sendHandler)
 	router.GET("/api/transactions", handler.transactionsHandler)
