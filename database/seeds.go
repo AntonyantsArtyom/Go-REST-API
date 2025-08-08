@@ -9,6 +9,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// Если база данных пуста, создает набор из 10 случайных кошельков с балансом 100 у.е.
+//
+// Параметры:
+//   - db: соединение с базой данных.
 func SeedWallets(db *gorm.DB) {
 	var count int64
 	err := db.Model(&models.Wallet{}).Count(&count).Error
