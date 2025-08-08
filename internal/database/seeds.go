@@ -3,7 +3,7 @@ package database
 import (
 	"log"
 
-	"wallet/models"
+	"wallet/internal/models"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

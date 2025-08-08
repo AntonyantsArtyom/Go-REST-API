@@ -1,6 +1,6 @@
 package api
 
-import "wallet/models"
+import "wallet/internal/models"
 
 type SendRequest struct {
 	From   string  `json:"from" binding:"required"`

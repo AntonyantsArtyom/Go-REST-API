@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"wallet/models"
+	"wallet/internal/models"
 
 	"gorm.io/gorm"
 )

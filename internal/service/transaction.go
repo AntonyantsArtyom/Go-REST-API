@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
+	"wallet/internal/models"
 	"wallet/internal/repository"
-	"wallet/models"
 )
 
 type TransactionService struct {

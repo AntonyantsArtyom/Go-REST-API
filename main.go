@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"wallet/api"
-	"wallet/database"
-	"wallet/models"
+	"wallet/internal/api"
+	"wallet/internal/database"
+	"wallet/internal/models"
 
 	"github.com/gin-gonic/gin"
 )
