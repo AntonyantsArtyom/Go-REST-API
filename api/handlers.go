@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"wallet/models"
 
@@ -28,8 +29,38 @@ func (handler *Handler) sendHandler(ctx *gin.Context) {
 }
 
 func (handler *Handler) transactionsHandler(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "",
+	countParam := ctx.DefaultQuery("count", "10")
+	count, err := strconv.Atoi(countParam)
+
+	switch {
+	case err != nil:
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error: "count must be a number",
+		})
+		return
+	case count <= 0:
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error: "count must be greater than 0",
+		})
+		return
+	case count > 100:
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error: "count must be less than 100",
+		})
+		return
+	}
+
+	var transactions []models.Transaction
+	databaseError := handler.databaseConnection.Limit(count).Order("created_at desc").Find(&transactions).Error
+	if databaseError != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{
+			Error: "database error: " + databaseError.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, TransactionsResponse{
+		Transactions: transactions,
 	})
 }
 
@@ -40,7 +71,7 @@ func (handler *Handler) balanceHandler(ctx *gin.Context) {
 	var databaseError = handler.databaseConnection.First(&wallet, "address = ?", address).Error
 	if databaseError != nil {
 		ctx.JSON(http.StatusNotFound, ErrorResponse{
-			Error: "wallet not found",
+			Error: "database error: " + databaseError.Error(),
 		})
 		return
 	}

@@ -1,5 +1,7 @@
 package api
 
+import "wallet/models"
+
 type SendRequest struct {
 	From   string  `json:"from" binding:"required"`
 	To     string  `json:"to" binding:"required"`
@@ -12,6 +14,10 @@ type SendResponse struct {
 
 type BalanceResponse struct {
 	Balance float64 `json:"balance"`
+}
+
+type TransactionsResponse struct {
+	Transactions []models.Transaction `json:"transactions"`
 }
 
 type ErrorResponse struct {
