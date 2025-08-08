@@ -23,9 +23,73 @@ type Handler struct {
 }
 
 func (handler *Handler) sendHandler(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "",
+	var request SendRequest
+
+	parsingError := ctx.ShouldBindJSON(&request)
+	if parsingError != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error: parsingError.Error(),
+		})
+		return
+	}
+
+	var sender models.Wallet
+	senderFindError := handler.databaseConnection.First(&sender, "address = ?", request.From).Error
+
+	switch {
+	case senderFindError != nil:
+		ctx.JSON(http.StatusNotFound, ErrorResponse{
+			Error: "database error: " + senderFindError.Error(),
+		})
+		return
+	case sender.Balance < request.Amount:
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error: "not enough balance",
+		})
+		return
+	}
+
+	var receiver models.Wallet
+	receiverFindError := handler.databaseConnection.First(&receiver, "address = ?", request.To).Error
+
+	if receiverFindError != nil {
+		ctx.JSON(http.StatusNotFound, ErrorResponse{
+			Error: "database error: " + receiverFindError.Error(),
+		})
+		return
+	}
+
+	transactionError := handler.databaseConnection.Transaction(func(tx *gorm.DB) error {
+		sender.Balance -= request.Amount
+		err := tx.Save(&sender).Error
+		if err != nil {
+			return err
+		}
+
+		receiver.Balance += request.Amount
+		err = tx.Save(&receiver).Error
+		if err != nil {
+			return err
+		}
+
+		return tx.Create(&models.Transaction{
+			FromWallet: request.From,
+			ToWallet:   request.To,
+			Amount:     request.Amount,
+		}).Error
 	})
+
+	if transactionError != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{
+			Error: "database error: " + transactionError.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, SendResponse{
+		Message: "transaction successful",
+	})
+
 }
 
 func (handler *Handler) transactionsHandler(ctx *gin.Context) {
