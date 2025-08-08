@@ -2,18 +2,17 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
-	"wallet/models"
+	"wallet/internal/repository"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type Handler struct {
-	databaseConnection *gorm.DB
+	walletRepo *repository.WalletRepo
 }
 
+/*
 func (handler *Handler) sendHandler(ctx *gin.Context) {
 	var request SendRequest
 
@@ -119,15 +118,15 @@ func (handler *Handler) transactionsHandler(ctx *gin.Context) {
 		Transactions: transactions,
 	})
 }
+*/
 
 func (handler *Handler) balanceHandler(ctx *gin.Context) {
 	address := ctx.Param("address")
 
-	var wallet models.Wallet
-	var databaseError = handler.databaseConnection.First(&wallet, "address = ?", address).Error
-	if databaseError != nil {
+	wallet, err := handler.walletRepo.FindByAddress(address)
+	if err != nil {
 		ctx.JSON(http.StatusNotFound, ErrorResponse{
-			Error: "database error: " + databaseError.Error(),
+			Error: "database error: " + err.Error(),
 		})
 		return
 	}
