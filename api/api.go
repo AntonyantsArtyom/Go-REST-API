@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 
 	"wallet/internal/repository"
+	"wallet/internal/service"
 )
 
 // Подключает в маршрутизатор Gin логику обработки роутов.
@@ -18,7 +19,9 @@ import (
 //   - GET /api/transactions — получение последних транзакций
 //   - GET /api/wallet/:address/balance — получение баланса кошелька
 func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
-	handler := &Handler{walletRepo: repository.NewWalletRepo(db)}
+	var walletRepo = repository.NewWalletRepo(db)
+	var WalletService = service.NewWalletService(*walletRepo)
+	handler := &Handler{WalletService}
 
 	//router.POST("/api/send", handler.sendHandler)
 	//router.GET("/api/transactions", handler.transactionsHandler)

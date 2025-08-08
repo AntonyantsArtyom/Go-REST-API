@@ -3,13 +3,13 @@ package api
 import (
 	"net/http"
 
-	"wallet/internal/repository"
+	"wallet/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	walletRepo *repository.WalletRepo
+	WalletService *service.WalletService
 }
 
 /*
@@ -123,7 +123,7 @@ func (handler *Handler) transactionsHandler(ctx *gin.Context) {
 func (handler *Handler) balanceHandler(ctx *gin.Context) {
 	address := ctx.Param("address")
 
-	wallet, err := handler.walletRepo.FindByAddress(address)
+	balance, err := handler.WalletService.GetBalance(address)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, ErrorResponse{
 			Error: "database error: " + err.Error(),
@@ -132,6 +132,6 @@ func (handler *Handler) balanceHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, BalanceResponse{
-		Balance: wallet.Balance,
+		Balance: balance,
 	})
 }

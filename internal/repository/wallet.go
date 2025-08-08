@@ -14,9 +14,9 @@ func NewWalletRepo(db *gorm.DB) *WalletRepo {
 	return &WalletRepo{db: db}
 }
 
-func (w *WalletRepo) FindByAddress(address string) (*models.Wallet, error) {
+func (wr *WalletRepo) FindByAddress(address string) (*models.Wallet, error) {
 	var wallet models.Wallet
-	err := w.db.First(&wallet, "address = ?", address).Error
+	err := wr.db.First(&wallet, "address = ?", address).Error
 	if err != nil {
 		return nil, err
 	}
