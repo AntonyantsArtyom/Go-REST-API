@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"wallet/internal/service"
 
@@ -9,7 +10,8 @@ import (
 )
 
 type Handler struct {
-	WalletService *service.WalletService
+	WalletService      *service.WalletService
+	TransactionService *service.TransactionService
 }
 
 /*
@@ -82,43 +84,24 @@ func (handler *Handler) sendHandler(ctx *gin.Context) {
 	})
 
 }
+*/
 
-func (handler *Handler) transactionsHandler(ctx *gin.Context) {
+func (h *Handler) transactionsHandler(ctx *gin.Context) {
 	countParam := ctx.DefaultQuery("count", "10")
 	count, err := strconv.Atoi(countParam)
-
-	switch {
-	case err != nil:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "count must be a number",
-		})
-		return
-	case count <= 0:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "count must be greater than 0",
-		})
-		return
-	case count > 100:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "count must be less than 100",
-		})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "count must be a number"})
 		return
 	}
 
-	var transactions []models.Transaction
-	databaseError := handler.databaseConnection.Limit(count).Order("created_at desc").Find(&transactions).Error
-	if databaseError != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error: "database error: " + databaseError.Error(),
-		})
+	transactions, err := h.TransactionService.GetRecentTransactions(count)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, TransactionsResponse{
-		Transactions: transactions,
-	})
+	ctx.JSON(http.StatusOK, TransactionsResponse{Transactions: transactions})
 }
-*/
 
 func (handler *Handler) balanceHandler(ctx *gin.Context) {
 	address := ctx.Param("address")
@@ -126,7 +109,7 @@ func (handler *Handler) balanceHandler(ctx *gin.Context) {
 	balance, err := handler.WalletService.GetBalance(address)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, ErrorResponse{
-			Error: "database error: " + err.Error(),
+			Error: err.Error(),
 		})
 		return
 	}
