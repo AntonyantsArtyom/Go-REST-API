@@ -6,20 +6,25 @@ import (
 
 	"wallet/api"
 	"wallet/database"
+	"wallet/models"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	databaseConnection, err := database.ConnectDatabase()
-	if err != nil {
-		log.Fatalf("connect error: %v", err)
+	databaseConnection, connectionError := database.ConnectDatabase()
+	if connectionError != nil {
+		log.Fatalf("connect error: %v", connectionError)
 	}
 
-	database, err := databaseConnection.DB()
+	database, getDatabaseError := databaseConnection.DB()
+	if getDatabaseError != nil {
+		log.Fatalf("get database error: %v", getDatabaseError)
+	}
 
-	if err != nil {
-		log.Fatalf("get database error: %v", err)
+	automigrationError := databaseConnection.AutoMigrate(&models.Wallet{}, &models.Transaction{})
+	if automigrationError != nil {
+		log.Fatalf("automigration error: %v", automigrationError)
 	}
 
 	defer database.Close()
