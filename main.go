@@ -17,17 +17,19 @@ func main() {
 		log.Fatalf("connect error: %v", connectionError)
 	}
 
-	database, getDatabaseError := databaseConnection.DB()
+	rawDatabase, getDatabaseError := databaseConnection.DB()
 	if getDatabaseError != nil {
 		log.Fatalf("get database error: %v", getDatabaseError)
 	}
+
+	defer rawDatabase.Close()
 
 	automigrationError := databaseConnection.AutoMigrate(&models.Wallet{}, &models.Transaction{})
 	if automigrationError != nil {
 		log.Fatalf("automigration error: %v", automigrationError)
 	}
 
-	defer database.Close()
+	database.SeedWallets(databaseConnection)
 
 	fmt.Println("database connected")
 
