@@ -10,14 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(router *gin.Engine, databaseConnection *gorm.DB) {
-	handler := &Handler{databaseConnection}
-
-	router.POST("/api/send", handler.sendHandler)
-	router.GET("/api/transactions", handler.transactionsHandler)
-	router.GET("/api/wallet/:address/balance", handler.balanceHandler)
-}
-
 type Handler struct {
 	databaseConnection *gorm.DB
 }
