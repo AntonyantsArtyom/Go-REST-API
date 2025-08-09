@@ -31,6 +31,9 @@ func (h *Handler) sendHandler(ctx *gin.Context) {
 	case req.Amount <= 0:
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "amount must be greater than 0"})
 		return
+	case req.From == req.To:
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "from and to must be different"})
+		return
 	}
 
 	err = h.operationService.SendMoney(req.From, req.To, req.Amount)
