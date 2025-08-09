@@ -17,12 +17,19 @@ type Handler struct {
 
 func (h *Handler) sendHandler(ctx *gin.Context) {
 	var req SendRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	err := ctx.ShouldBindJSON(&req)
+
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	err := h.operationService.SendMoney(req.From, req.To, req.Amount)
+	if req.Amount <= 0 {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "amount must be greater than 0"})
+		return
+	}
+
+	err = h.operationService.SendMoney(req.From, req.To, req.Amount)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
