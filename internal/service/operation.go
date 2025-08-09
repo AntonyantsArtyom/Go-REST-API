@@ -22,6 +22,20 @@ func NewOperationService(or repository.OperationRepo, wr repository.WalletRepo) 
 	return &OperationService{operationRepo: or, walletRepo: wr}
 }
 
+// Переводит баланс между кошельками в базе данных, создает запись о транзакции.
+//
+// Возвращает ошибку (при успехе nil)
+//
+// Параметры:
+//   - from: кошелек отправителя
+//   - to: кошелек получателя
+//   - amount: сумма перевода
+//
+// Возможные ошибки:
+//   - ErrReceiverWalletNotFound, если кошелек получателя не найден
+//   - ErrSenderWalletNotFound, если кошелек отправителя не найден
+//   - ErrInsufficientBalance, если у кошелька отправителя недостаточно средств
+//   - error, если произошла другая ошибка
 func (os *OperationService) SendMoney(from, to string, amount float64) error {
 	sender, err := os.walletRepo.FindByAddress(from)
 

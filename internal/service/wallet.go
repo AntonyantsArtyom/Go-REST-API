@@ -19,6 +19,14 @@ func NewWalletService(r repository.WalletRepo) *WalletService {
 	return &WalletService{walletRepo: r}
 }
 
+// Возвращает баланс кошелька по адресу и ошибку (при успехе nil)
+//
+// Параметры:
+//   - address: адрес кошелька
+//
+// Возможные ошибки:
+//   - ErrWalletNotFound, если кошелек не найден
+//   - error, если произошла другая ошибка
 func (ws *WalletService) GetBalance(address string) (float64, error) {
 	wallet, err := ws.walletRepo.FindByAddress(address)
 
