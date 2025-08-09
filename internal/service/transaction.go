@@ -1,8 +1,13 @@
 package service
 
 import (
+	"errors"
 	"wallet/internal/models"
 	"wallet/internal/repository"
+)
+
+var (
+	ErrTransactionNotFound = errors.New("transactions empty")
 )
 
 type TransactionService struct {
@@ -14,5 +19,14 @@ func NewTransactionService(r repository.TransactionRepo) *TransactionService {
 }
 
 func (ts *TransactionService) GetRecentTransactions(count int) ([]models.Transaction, error) {
-	return ts.transactionRepo.FindRecent(count)
+	transactions, err := ts.transactionRepo.FindRecent(count)
+
+	switch {
+	case len(transactions) == 0:
+		return nil, ErrTransactionNotFound
+	case err != nil:
+		return nil, err
+	}
+
+	return transactions, err
 }
