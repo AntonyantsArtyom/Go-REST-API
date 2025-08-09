@@ -14,6 +14,10 @@ func NewWalletRepo(db *gorm.DB) *WalletRepo {
 	return &WalletRepo{db: db}
 }
 
+// Получает кошелек из базы по его адресу
+//
+// Параметры:
+//   - address: адрес кошелька
 func (wr *WalletRepo) FindByAddress(address string) (*models.Wallet, error) {
 	var wallet models.Wallet
 	err := wr.db.First(&wallet, "address = ?", address).Error

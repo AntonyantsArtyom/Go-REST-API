@@ -14,6 +14,10 @@ func NewTransactionRepo(db *gorm.DB) *TransactionRepo {
 	return &TransactionRepo{db}
 }
 
+// Получает из базы последние N транзакций
+//
+// Параметры:
+//   - сount: количество необходимых транзакций
 func (tr *TransactionRepo) FindRecent(count int) ([]models.Transaction, error) {
 	var transactions []models.Transaction
 	err := tr.db.Limit(count).Order("created_at desc").Find(&transactions).Error

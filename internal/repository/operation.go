@@ -14,6 +14,12 @@ func NewOperationsRepo(db *gorm.DB) *OperationRepo {
 	return &OperationRepo{db}
 }
 
+// Переводит баланс между кошельками в базе данных, создает запись о транзакции
+//
+// Параметры:
+//   - sender: кошелек отправителя
+//   - receiver: кошелек получателя
+//   - amount: сумма перевода
 func (r *OperationRepo) TransferBalance(sender *models.Wallet, receiver *models.Wallet, amount float64) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		sender.Balance -= amount

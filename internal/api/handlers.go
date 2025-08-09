@@ -16,6 +16,10 @@ type Handler struct {
 	operationService   *service.OperationService
 }
 
+// Обрабатывает запрос перевода средств между кошельками
+//   - получает тело запроса SendRequest
+//   - отдает SendResponse в случае успеха
+//   - отдает ErrorResponse в случае ошибки
 func (h *Handler) sendHandler(ctx *gin.Context) {
 	var req SendRequest
 	err := ctx.ShouldBindJSON(&req)
@@ -43,6 +47,10 @@ func (h *Handler) sendHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, SendResponse{Message: "transaction successful"})
 }
 
+// Обрабатывает запрос получения N последних транзакций
+//   - получает query-параметр count, по умолчанию 10
+//   - отдает TransactionsResponse в случае успеха
+//   - отдает ErrorResponse в случае ошибки
 func (h *Handler) transactionsHandler(ctx *gin.Context) {
 	countParam := ctx.DefaultQuery("count", "10")
 	count, err := strconv.Atoi(countParam)
@@ -73,6 +81,10 @@ func (h *Handler) transactionsHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, TransactionsResponse{Transactions: transactions})
 }
 
+// Обрабатывает запрос получения баланса кошелька
+//   - получает параметр address
+//   - отдает BalanceResponse в случае успеха
+//   - отдает ErrorResponse в случае ошибки
 func (h *Handler) balanceHandler(ctx *gin.Context) {
 	address := ctx.Param("address")
 
