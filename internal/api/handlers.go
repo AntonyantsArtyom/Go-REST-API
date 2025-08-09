@@ -31,13 +31,12 @@ func (h *Handler) sendHandler(ctx *gin.Context) {
 
 	err = h.operationService.SendMoney(req.From, req.To, req.Amount)
 
-	if err != nil {
-		switch {
-		case errors.Is(err, service.ErrSenderWalletNotFound), errors.Is(err, service.ErrReceiverWalletNotFound):
-			ctx.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
-		default:
-			ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: "unexpected server error"})
-		}
+	switch {
+	case errors.Is(err, service.ErrSenderWalletNotFound), errors.Is(err, service.ErrReceiverWalletNotFound):
+		ctx.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
+		return
+	case err != nil:
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: "unexpected server error"})
 		return
 	}
 
@@ -62,15 +61,13 @@ func (h *Handler) transactionsHandler(ctx *gin.Context) {
 
 	transactions, err := h.transactionService.GetRecentTransactions(count)
 
-	if err != nil {
-		switch err {
-		case service.ErrTransactionNotFound:
-			ctx.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
-			return
-		default:
-			ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
-			return
-		}
+	switch {
+	case errors.Is(err, service.ErrTransactionNotFound):
+		ctx.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
+		return
+	case err != nil:
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, TransactionsResponse{Transactions: transactions})
@@ -81,10 +78,12 @@ func (h *Handler) balanceHandler(ctx *gin.Context) {
 
 	balance, err := h.walletService.GetBalance(address)
 
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, ErrorResponse{
-			Error: err.Error(),
-		})
+	switch {
+	case errors.Is(err, service.ErrWalletNotFound):
+		ctx.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
+		return
+	case err != nil:
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
