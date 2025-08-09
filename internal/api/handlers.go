@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -8,8 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-//TODO: типизировать ошибки
 
 type Handler struct {
 	walletService      *service.WalletService
@@ -32,7 +31,13 @@ func (h *Handler) sendHandler(ctx *gin.Context) {
 	}
 
 	err = h.operationService.SendMoney(req.From, req.To, req.Amount)
+
 	if err != nil {
+		if errors.Is(err, service.ErrSenderWalletNotFound) || errors.Is(err, service.ErrReceiverWalletNotFound) {
+			ctx.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
+			return
+		}
+
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -43,6 +48,7 @@ func (h *Handler) sendHandler(ctx *gin.Context) {
 func (h *Handler) transactionsHandler(ctx *gin.Context) {
 	countParam := ctx.DefaultQuery("count", "10")
 	count, err := strconv.Atoi(countParam)
+
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "count must be a number"})
 		return
