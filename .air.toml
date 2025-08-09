@@ -1,9 +1,9 @@
-# .air.toml
 [build]
-  cmd = "go build -o main ."
-  bin = "main"
-  full_bin = "./main"
-  include_ext = ["go"]
-  exclude_dir = []
-  delay = 1000
-  poll = true
+cmd = "go build -o ./cmd/main ./cmd"
+bin = "main"
+full_bin = "./cmd/main"
+include_ext = ["go"]
+exclude_dir = []
+delay = 1000
+poll = true
+
