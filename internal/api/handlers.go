@@ -20,12 +20,11 @@ func (h *Handler) sendHandler(ctx *gin.Context) {
 	var req SendRequest
 	err := ctx.ShouldBindJSON(&req)
 
-	if err != nil {
+	switch {
+	case err != nil:
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
-	}
-
-	if req.Amount <= 0 {
+	case req.Amount <= 0:
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "amount must be greater than 0"})
 		return
 	}
@@ -33,12 +32,12 @@ func (h *Handler) sendHandler(ctx *gin.Context) {
 	err = h.operationService.SendMoney(req.From, req.To, req.Amount)
 
 	if err != nil {
-		if errors.Is(err, service.ErrSenderWalletNotFound) || errors.Is(err, service.ErrReceiverWalletNotFound) {
+		switch {
+		case errors.Is(err, service.ErrSenderWalletNotFound), errors.Is(err, service.ErrReceiverWalletNotFound):
 			ctx.JSON(http.StatusNotFound, ErrorResponse{Error: err.Error()})
-			return
+		default:
+			ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		}
-
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -74,6 +73,7 @@ func (h *Handler) balanceHandler(ctx *gin.Context) {
 	address := ctx.Param("address")
 
 	balance, err := h.walletService.GetBalance(address)
+
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, ErrorResponse{
 			Error: err.Error(),
