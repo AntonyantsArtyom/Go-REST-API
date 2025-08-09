@@ -49,8 +49,15 @@ func (h *Handler) transactionsHandler(ctx *gin.Context) {
 	countParam := ctx.DefaultQuery("count", "10")
 	count, err := strconv.Atoi(countParam)
 
-	if err != nil {
+	switch {
+	case err != nil:
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "count must be a number"})
+		return
+	case count <= 0:
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "count must be greater than 0"})
+		return
+	case count > 100:
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: "count must be less than or equal to 100"})
 		return
 	}
 

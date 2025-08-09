@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"wallet/internal/models"
 	"wallet/internal/repository"
 )
@@ -15,11 +14,5 @@ func NewTransactionService(r repository.TransactionRepo) *TransactionService {
 }
 
 func (ts *TransactionService) GetRecentTransactions(count int) ([]models.Transaction, error) {
-	if count <= 0 {
-		return nil, fmt.Errorf("filter count must be greater than 0")
-	}
-	if count > 100 {
-		return nil, fmt.Errorf("filter count must be less than 100")
-	}
 	return ts.transactionRepo.FindRecent(count)
 }
