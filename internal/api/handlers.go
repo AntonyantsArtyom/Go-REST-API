@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//TODO: типизировать ошибки
+
 type Handler struct {
 	walletService      *service.WalletService
 	transactionService *service.TransactionService
