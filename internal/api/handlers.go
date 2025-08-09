@@ -10,9 +10,9 @@ import (
 )
 
 type Handler struct {
-	WalletService      *service.WalletService
-	TransactionService *service.TransactionService
-	OperationSerice    *service.OperationService
+	walletService      *service.WalletService
+	transactionService *service.TransactionService
+	operationService   *service.OperationService
 }
 
 func (h *Handler) sendHandler(ctx *gin.Context) {
@@ -22,7 +22,7 @@ func (h *Handler) sendHandler(ctx *gin.Context) {
 		return
 	}
 
-	err := h.OperationSerice.SendMoney(req.From, req.To, req.Amount)
+	err := h.operationService.SendMoney(req.From, req.To, req.Amount)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
@@ -39,7 +39,7 @@ func (h *Handler) transactionsHandler(ctx *gin.Context) {
 		return
 	}
 
-	transactions, err := h.TransactionService.GetRecentTransactions(count)
+	transactions, err := h.transactionService.GetRecentTransactions(count)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
@@ -48,10 +48,10 @@ func (h *Handler) transactionsHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, TransactionsResponse{Transactions: transactions})
 }
 
-func (handler *Handler) balanceHandler(ctx *gin.Context) {
+func (h *Handler) balanceHandler(ctx *gin.Context) {
 	address := ctx.Param("address")
 
-	balance, err := handler.WalletService.GetBalance(address)
+	balance, err := h.walletService.GetBalance(address)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, ErrorResponse{
 			Error: err.Error(),
